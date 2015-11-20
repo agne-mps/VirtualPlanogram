@@ -20,43 +20,70 @@
     <script>
 
 var map;
+var polygons = [];
+var walks = [[[59.27065189561128,17.916005551815033],[59.27069438306799,17.915715873241425],[59.270762911112264,17.915415465831757],[59.27087803791632,17.915410101413727],[59.27087803791632,17.915200889110565],[59.27084103291459,17.915160655975342],[59.27084377402719,17.915080189704895],[59.2709150428778,17.91494071483612],[59.27108773216656,17.915080189704895],[59.271057580131604,17.915353775024414],[59.271020575324975,17.915522754192352],[59.27104113355586,17.915611267089844],[59.271112401993456,17.915573716163635],[59.27116859431032,17.915780246257782],[59.2712439741019,17.915678322315216],[59.27130153673952,17.915874123573303],[59.27138513944471,17.91578561067581],[59.27147285353772,17.91609138250351],[59.271415291189655,17.916179895401],[59.27133168855848,17.916297912597656],[59.27139884478663,17.91643738746643],[59.27159757162479,17.916161119937897],[59.27161401793186,17.916346192359924],[59.27131935372669,17.916764616966248],[59.27120285787264,17.916450798511505],[59.271241233021506,17.91642665863037],[59.271322094800794,17.916686832904816],[59.271346764457974,17.91659027338028],[59.27125905004022,17.916273772716522],[59.271179558654005,17.916405200958252],[59.27120285787264,17.91647493839264],[59.271148036156376,17.916539311408997],[59.27115077724428,17.916660010814667],[59.27121793382913,17.916861176490784],[59.27115625941944,17.9169899225235],[59.271069915058234,17.917097210884094],[59.270942453934474,17.91660636663437],[59.27084103291459,17.916284501552582],[59.2709205250909,17.91628986597061],[59.271065803416526,17.916134297847748],[59.27098357047815,17.915903627872467],[59.27091778398445,17.915984094142914],[59.27088214958068,17.915890216827393],[59.270956159454556,17.915809750556946],[59.270893114016594,17.915651500225067],[59.27062722545081,17.91612356901169]]];
+
+function getPoints() {
+    var ps =[];
+    for (i=0; i < walks.length; i++) {
+        for (j=0; j < walks[i].length; j++) {
+            ps.push(new google.maps.LatLng(walks[i][j][0], walks[i][j][1]));
+        }
+    }
+    return ps;
+
+}
 
 function initMap() {
-  map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 59.2712411, lng: 17.9160637},
-    zoom: 23,
-    mapTypeId: google.maps.MapTypeId.TERRAIN,
-    heading: 180,
-    tilt: 45
-  });
-  var drawingManager = new google.maps.drawing.DrawingManager({
-    drawingMode: google.maps.drawing.OverlayType.MARKER,
-    drawingControl: true,
-    drawingControlOptions: {
-      position: google.maps.ControlPosition.TOP_CENTER,
-      drawingModes: [
-        google.maps.drawing.OverlayType.MARKER,
-        google.maps.drawing.OverlayType.CIRCLE,
-        google.maps.drawing.OverlayType.POLYGON,
-        google.maps.drawing.OverlayType.POLYLINE,
-        google.maps.drawing.OverlayType.RECTANGLE
-      ]
-    },
-    markerOptions: {icon: 'beacon_15x15.png'},
-    circleOptions: {
-      fillColor: '#ffff00',
-      fillOpacity: 1,
-      strokeWeight: 5,
-      clickable: false,
-      editable: true,
-      zIndex: 1
-    }
-  });
-  drawingManager.setMap(map);
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 59.2712411, lng: 17.9160637},
+        zoom: 23,
+        mapTypeId: google.maps.MapTypeId.TERRAIN,
+        heading: 180,
+        tilt: 45
+    });
+    var drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.MARKER,
+        drawingControl: true,
+        drawingControlOptions: {
+            position: google.maps.ControlPosition.TOP_CENTER,
+            drawingModes: [
+                google.maps.drawing.OverlayType.MARKER,
+                google.maps.drawing.OverlayType.CIRCLE,
+                google.maps.drawing.OverlayType.POLYGON,
+                    google.maps.drawing.OverlayType.POLYLINE,
+                    google.maps.drawing.OverlayType.RECTANGLE
+            ]
+        },
+        markerOptions: {icon: 'images/beacon_15x15.png'},
+        circleOptions: {
+            fillColor: '#ffff00',
+            fillOpacity: 1,
+            strokeWeight: 5,
+            clickable: false,
+            editable: true,
+            zIndex: 1
+        }
+    });
+    drawingManager.setMap(map);
+    google.maps.event.addListener(drawingManager, "overlaycomplete", function(event){
+        polygon = [];
+        points =  event.overlay.getPath().getArray();
+
+        for (i = 0; i < points.length; i++) {
+            polygon.push([points[i].lat(), points[i].lng()])
+        }
+        polygons.push(polygon);
+    });
+
+    heatmap = new google.maps.visualization.HeatmapLayer({
+        data: getPoints(),
+        map: map
+    });
 }
 
     </script>
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?&callback=initMap&libraries=drawing"></script>
+        src="https://maps.googleapis.com/maps/api/js?&callback=initMap&libraries=drawing,visualization"></script>
   </body>
 </html>
